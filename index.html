@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Circuit Coach — Clickable Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F1B2B; --paper:#E7ECEF; --panel:#FFFFFF; --line:#3E5C76;
+  --amber:#E3A008; --amber-ink:#3A2900; --teal:#2F6F6B; --rust:#C1502E;
+  --muted:#5C6B7A; --grid: rgba(62,92,118,0.14);
+}
+:root:not([data-theme="light"]) { }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E7ECEF; --paper:#0B1420; --panel:#101E2E; --line:#33506B;
+    --muted:#9AB0C2; --grid: rgba(122,164,196,0.14);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E7ECEF; --paper:#0B1420; --panel:#101E2E; --line:#33506B;
+  --muted:#9AB0C2; --grid: rgba(122,164,196,0.14);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:'IBM Plex Sans', system-ui, sans-serif;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+h1,h2,h3,.brand,.cta{ font-family:'Space Grotesk', system-ui, sans-serif; }
+.wrap{ max-width:920px; margin:0 auto; padding:24px 16px 48px; }
+.top{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:18px;}
+.brand{ font-size:1.3rem; font-weight:700; letter-spacing:-0.01em;}
+.brand span{ color:var(--amber); }
+.sub{ color:var(--muted); font-size:0.92rem; max-width:46ch; }
+
+.flowbar{ display:flex; gap:6px; margin:18px 0 20px; flex-wrap:wrap; }
+.flowbtn{
+  border:1px solid var(--line); background:transparent; color:var(--ink);
+  padding:8px 14px; border-radius:999px; font-size:0.86rem; cursor:pointer;
+  font-family:'IBM Plex Sans'; font-weight:500;
+}
+.flowbtn[aria-pressed="true"]{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+.stage{ display:grid; grid-template-columns: 340px 1fr; gap:28px; align-items:start; }
+@media (max-width:720px){ .stage{ grid-template-columns:1fr; } }
+
+.phone{
+  background:var(--panel); border:1px solid var(--line); border-radius:28px;
+  padding:14px; box-shadow:0 12px 30px rgba(15,27,43,0.14);
+}
+.notch{ height:6px; width:56px; background:var(--line); border-radius:4px; margin:0 auto 12px; opacity:0.5;}
+.screenname{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:8px; }
+.card{ background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:18px; min-height:360px; display:flex; flex-direction:column; justify-content:space-between; gap:14px;}
+.card h2{ margin:0 0 6px; font-size:1.15rem; line-height:1.3; }
+.card p{ margin:0; color:var(--muted); font-size:0.92rem; line-height:1.5; }
+.tag{ display:inline-block; font-size:0.72rem; padding:3px 9px; border-radius:999px; background:rgba(227,160,8,0.16); color:var(--amber-ink,var(--amber)); border:1px solid var(--amber); margin-bottom:6px; width:fit-content;}
+.body-block{ flex:1; }
+.actions{ display:flex; flex-direction:column; gap:8px; }
+.cta{
+  border:none; border-radius:10px; padding:13px 16px; font-size:0.95rem; font-weight:700;
+  cursor:pointer; text-align:left; display:flex; align-items:center; justify-content:space-between;
+}
+.cta.primary{ background:var(--amber); color:#241900; }
+.cta.ghost{ background:transparent; border:1px solid var(--line); color:var(--ink); }
+.cta.stuck{ background:transparent; border:1px solid var(--rust); color:var(--rust); }
+.cta.mastered{ background:var(--teal); color:#eafff9; }
+.cta small{ font-weight:400; opacity:0.75; margin-left:8px; }
+.list-row{
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  border:1px solid var(--line); border-radius:10px; padding:12px 14px; cursor:pointer; background:var(--panel);
+}
+.list-row:hover{ border-color:var(--amber); }
+.list-row .meta{ font-size:0.78rem; color:var(--muted); }
+.pill{ font-size:0.72rem; padding:2px 8px; border-radius:999px; border:1px solid var(--rust); color:var(--rust); }
+
+.notes{ padding-top:4px; }
+.notes h3{ font-size:0.95rem; margin:0 0 6px; }
+.notes p{ color:var(--muted); font-size:0.88rem; line-height:1.55; margin:0 0 14px; }
+.stagelabel{ font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--amber); font-weight:600; margin-bottom:4px; }
+.reset{ background:none; border:none; color:var(--muted); text-decoration:underline; cursor:pointer; font-size:0.82rem; padding:0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="brand">Circuit <span>Coach</span></div>
+      <div class="sub">Clickable prototype — adaptive micro-remediation for vocational learners. Tap through each flow below.</div>
+    </div>
+    <button class="reset" id="resetBtn">↺ Restart this flow</button>
+  </div>
+
+  <div class="flowbar" id="flowbar"></div>
+
+  <div class="stage">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screenname" id="screenname"></div>
+      <div class="card" id="card"></div>
+    </div>
+    <div class="notes">
+      <div class="stagelabel" id="stagelabel"></div>
+      <h3 id="noteTitle"></h3>
+      <p id="noteBody"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+const FLOWS = {
+  learner: { label: "Learner journey", start: "assessment" },
+  educator: { label: "Educator escalation", start: "triage" },
+  onboarding: { label: "Cold-start onboarding", start: "welcome" },
+  recheck: { label: "Spaced re-assessment", start: "microcheck" },
+};
+
+const SCREENS = {
+  assessment: {
+    flow:"learner", name:"Screen 1 · Assessment View", tag:"Module 3 · Wiring Basics",
+    title:"Quick check: Basic Circuits", body:"5 questions · ~2 min. Answer what you can — this just helps us find the right next step for you.",
+    actions:[{label:"Submit Answers", kind:"primary", next:"results"}],
+    stage:"User Goal / Task", note:"Captures raw performance data across the module. Nothing about this screen should feel like a test — it's framed as a quick check, not a grade."
+  },
+  results: {
+    flow:"learner", name:"Screen 2 · Results & Transition", tag:"Module 3 complete",
+    title:"Great effort on Module 3!", body:"We looked at your answers. There's one concept worth a quick review before you move on.",
+    actions:[{label:"See My Recommended Next Step", kind:"primary", next:"recommendation"}],
+    stage:"Interaction", note:"The Knowledge Tracing Engine runs here, scoring responses against the concept-dependency graph. Requiring a tap — instead of auto-redirecting — keeps the learner in control."
+  },
+  recommendation: {
+    flow:"learner", name:"Screen 3 · Recommendation Card", tag:"Diagnosed gap",
+    title:"You did well on basic wiring, but circuit diagrams seem tricky.", body:"Recommended: a short walkthrough on reading circuit diagrams.",
+    actions:[{label:"Review Circuit Diagrams", kind:"primary", next:"remedial", hint:"3 min"}],
+    stage:"System Response", note:"One diagnostic, one prescription, one action — never a dashboard. This is the direct, plain-language output of the mastery model."
+  },
+  remedial: {
+    flow:"learner", name:"Screen 4 · Remedial View", tag:"Reading Circuit Diagrams",
+    title:"Circuit diagrams, in 3 minutes", body:"[ Short diagram walkthrough plays here ] — symbols, current flow, and how to trace a fault.",
+    actions:[
+      {label:"Got it!", kind:"mastered", next:"assessment", icon:"👍"},
+      {label:"I'm still stuck", kind:"stuck", next:"triage", icon:"✋", switchFlow:"educator"}
+    ],
+    stage:"Action / Escalation", note:"“Got it!” loops back into practice with a spaced re-check scheduled quietly in the background. “I'm still stuck” escalates immediately — the system never retries automation on its own."
+  },
+
+  triage: {
+    flow:"educator", name:"Screen E1 · Triage List", tag:"3 open escalations",
+    title:"Learners flagged for you", body:"", list:[
+      {label:"J. Alvarez — Reading Circuit Diagrams", meta:"2 attempts · escalated 4m ago", next:"detail"},
+      {label:"R. Osei — Fault Finding", meta:"1 attempt · escalated 1h ago", next:"detail"},
+      {label:"M. Tan — Basic Wiring", meta:"repeat gap · escalated yesterday", flag:true, next:"detail"},
+    ],
+    stage:"Escalation triage", note:"Only escalated, pre-diagnosed cases appear here — no raw activity logs to dig through. The educator's attention goes straight to who actually needs it."
+  },
+  detail: {
+    flow:"educator", name:"Screen E2 · Learner Detail", tag:"J. Alvarez",
+    title:"Reading Circuit Diagrams", body:"Tried: 3-min video walkthrough (no improvement). 2 attempts on the concept. No prior escalations this term.",
+    actions:[{label:"Choose a resolution", kind:"ghost", next:"resolve"}],
+    stage:"Escalation triage", note:"Shows what the learner already tried, so the educator doesn't repeat a fix that already failed."
+  },
+  resolve: {
+    flow:"educator", name:"Screen E3 · Resolution", tag:"J. Alvarez",
+    title:"How do you want to help?", body:"",
+    actions:[
+      {label:"Send a personal tip", kind:"ghost", next:"triage"},
+      {label:"Assign alternate content", kind:"ghost", next:"triage"},
+      {label:"Mark resolved after check-in", kind:"primary", next:"triage"},
+    ],
+    stage:"Escalation triage", note:"Any resolution clears the flag and routes the learner back into their normal flow at Screen 1."
+  },
+
+  welcome: {
+    flow:"onboarding", name:"Screen O1 · Welcome & Goal Setting", tag:"New learner",
+    title:"What are you training in?", body:"Pick your track and where you're starting from — this shapes your first few modules.",
+    actions:[{label:"Electrical · Some experience", kind:"primary", next:"placement"}],
+    stage:"Cold start", note:"No performance history exists yet, so we ask directly rather than guessing."
+  },
+  placement: {
+    flow:"onboarding", name:"Screen O2 · Placement Quiz", tag:"Foundational concepts",
+    title:"A few quick questions", body:"6 questions across the basics of your track — low stakes, just to find your starting point.",
+    actions:[{label:"Submit", kind:"primary", next:"starting"}],
+    stage:"Cold start", note:"Seeds the mastery model with an initial estimate, solving the cold-start problem before real usage data exists."
+  },
+  starting: {
+    flow:"onboarding", name:"Screen O3 · Starting Point", tag:"Recommended for you",
+    title:"Start with: Basic Wiring", body:"Based on your quiz, this is the best place to begin your Electrical track.",
+    actions:[{label:"Begin Module 1", kind:"primary", next:"assessment", switchFlow:"learner"}],
+    stage:"Cold start", note:"Uses the same Recommendation Card pattern as Screen 3, so the interface feels consistent from day one."
+  },
+
+  microcheck: {
+    flow:"recheck", name:"Screen R1 · Spaced Micro-Check", tag:"Embedded in Module 5",
+    title:"Quick one — while you're here", body:"One ungraded-feeling question on circuit diagrams, tucked into a later, unrelated module.",
+    actions:[
+      {label:"Answer correctly", kind:"mastered", next:"mastered"},
+      {label:"Answer incorrectly", kind:"stuck", next:"reflagged"},
+    ],
+    stage:"Mastery confirmation", note:"A self-report of “Got it!” isn't trusted outright — this spaced, interleaved check confirms the gap actually closed."
+  },
+  mastered: {
+    flow:"recheck", name:"Screen R2 · Confirmed", tag:"Circuit Diagrams",
+    title:"Mastery confirmed", body:"This concept is now marked mastered in your profile. No further check-ins needed.",
+    actions:[{label:"Back to start", kind:"ghost", next:"microcheck"}],
+    stage:"Mastery confirmation", note:"Closes the loop for real, rather than on a single self-report."
+  },
+  reflagged: {
+    flow:"recheck", name:"Screen R2 · Re-flagged", tag:"Circuit Diagrams · repeat gap",
+    title:"Still not quite there", body:"Routed back to a recommendation — this time marked as a repeat gap, raising its priority for your educator.",
+    actions:[{label:"See Recommendation Card", kind:"primary", next:"recommendation", switchFlow:"learner"}],
+    stage:"Mastery confirmation", note:"A repeat gap is weighted higher for escalation, since automated remediation has already failed once."
+  },
+};
+
+let currentFlow = "learner";
+let currentScreen = FLOWS.learner.start;
+
+function renderFlowbar(){
+  const bar = document.getElementById("flowbar");
+  bar.innerHTML = "";
+  Object.entries(FLOWS).forEach(([key,f])=>{
+    const b = document.createElement("button");
+    b.className = "flowbtn"; b.textContent = f.label;
+    b.setAttribute("aria-pressed", key===currentFlow ? "true":"false");
+    b.onclick = ()=>{ currentFlow = key; currentScreen = f.start; render(); };
+    bar.appendChild(b);
+  });
+}
+
+function render(){
+  renderFlowbar();
+  const s = SCREENS[currentScreen];
+  document.getElementById("screenname").textContent = s.name;
+  document.getElementById("stagelabel").textContent = s.stage;
+  document.getElementById("noteTitle").textContent = s.title;
+  document.getElementById("noteBody").textContent = s.note;
+
+  const card = document.getElementById("card");
+  card.innerHTML = "";
+
+  const top = document.createElement("div");
+  top.className = "body-block";
+  const tag = document.createElement("div"); tag.className="tag"; tag.textContent = s.tag;
+  const h2 = document.createElement("h2"); h2.textContent = s.title;
+  top.appendChild(tag); top.appendChild(h2);
+  if(s.body){ const p = document.createElement("p"); p.textContent = s.body; top.appendChild(p); }
+
+  if(s.list){
+    s.list.forEach(item=>{
+      const row = document.createElement("div"); row.className="list-row"; row.style.marginTop="8px";
+      const left = document.createElement("div");
+      left.innerHTML = `<div>${item.label}</div><div class="meta">${item.meta}</div>`;
+      row.appendChild(left);
+      if(item.flag){ const p = document.createElement("span"); p.className="pill"; p.textContent="repeat"; row.appendChild(p); }
+      row.onclick = ()=>{ currentScreen = item.next; render(); };
+      top.appendChild(row);
+    });
+  }
+  card.appendChild(top);
+
+  const actions = document.createElement("div"); actions.className="actions";
+  (s.actions||[]).forEach(a=>{
+    const btn = document.createElement("button");
+    btn.className = "cta " + a.kind;
+    btn.innerHTML = (a.icon? a.icon+" " : "") + a.label + (a.hint? ` <small>${a.hint}</small>`:"");
+    btn.onclick = ()=>{
+      if(a.switchFlow) currentFlow = a.switchFlow;
+      currentScreen = a.next; render();
+    };
+    actions.appendChild(btn);
+  });
+  card.appendChild(actions);
+}
+
+document.getElementById("resetBtn").onclick = ()=>{ currentScreen = FLOWS[currentFlow].start; render(); };
+
+render();
+</script>
+</body>
+</html>
